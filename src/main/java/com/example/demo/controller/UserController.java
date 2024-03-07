@@ -40,7 +40,7 @@ public class UserController {
             return utilService.buildResponse(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE);
         }
         userService.deleteUser(existingUser.get());
-        return utilService.buildResponse(HttpStatus.OK, "User deleted successfully.");
+        return utilService.buildResponse(HttpStatus.OK, "User deleted successfully");
     }
 
     @PutMapping(produces = "application/json")
@@ -50,14 +50,14 @@ public class UserController {
             return utilService.buildResponse(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE);
         }
         User updatedUser = userService.updateUser(userUpdates, existingUser.get());
-        return utilService.buildResponse(HttpStatus.OK, "User updated successfully.", updatedUser);
+        return utilService.buildResponse(HttpStatus.OK, "User updated successfully", updatedUser);
     }
 
     @GetMapping(value = "/{userName}", produces = "application/json")
     public ResponseEntity<Object> getUser(@PathVariable String userName) {
         Optional<User> existingUser = userService.findByUserName(userName);
         User user = existingUser.orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MESSAGE));
-        return utilService.buildResponse(HttpStatus.OK,  "User retrieved successfully.", user);
+        return utilService.buildResponse(HttpStatus.OK,  "User retrieved successfully", user);
     }
 
     @GetMapping(produces = "application/json")
