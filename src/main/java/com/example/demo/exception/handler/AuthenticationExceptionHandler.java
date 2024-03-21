@@ -1,14 +1,18 @@
 package com.example.demo.exception.handler;
 
 import com.example.demo.exception.UserAlreadyExistsException;
+import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.UtilityService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.logging.Level;
 
 @RestControllerAdvice
 public class AuthenticationExceptionHandler {
@@ -39,5 +43,10 @@ public class AuthenticationExceptionHandler {
         return utilService.buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException exception) {
+        AuthenticationService.LOGGER.log(Level.SEVERE, "User authentication failed", exception);
+        return utilService.buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
 
 }

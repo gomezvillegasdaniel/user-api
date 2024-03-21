@@ -23,7 +23,7 @@ class UserControllerTest extends BaseControllerTest {
     void init() throws Exception {
         registerTestUser();
         loginTestUser();
-        assertNotNull(token);
+        assertNotNull(TOKEN);
     }
 
     @Test
@@ -32,7 +32,7 @@ class UserControllerTest extends BaseControllerTest {
     void getUserTest() throws Exception {
         MockHttpServletRequestBuilder request = get("/user/testUser")
             .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer " + token);
+            .header("Authorization", "Bearer " + TOKEN);
         mockMvc.perform(request)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.message", equalTo("User retrieved successfully")))
@@ -55,11 +55,10 @@ class UserControllerTest extends BaseControllerTest {
         MockHttpServletRequestBuilder request = put("/user")
             .contentType(MediaType.APPLICATION_JSON)
             .content(gson.toJson(user))
-            .header("Authorization", "Bearer " + token);
+            .header("Authorization", "Bearer " + TOKEN);
         mockMvc.perform(request)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.message", equalTo("User updated successfully")))
-            .andExpect(jsonPath("$.object.email", equalTo("updated_email@host.com")));
+            .andExpect(jsonPath("$.message", equalTo("User updated successfully")));
     }
 
     @Test

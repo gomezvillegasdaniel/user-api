@@ -19,14 +19,19 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
-    public User updateUser(User userUpdates, User userToUpdate) {
-        userToUpdate.setUsername(userUpdates.getUsername());
-        userToUpdate.setFirstname(userUpdates.getFirstname());
-        userToUpdate.setLastname(userUpdates.getLastname());
-        userToUpdate.setPassword(userUpdates.getPassword());
-        userToUpdate.setEmail(userUpdates.getEmail());
-        userToUpdate.setPhone(userUpdates.getPhone());
-        return userRepository.save(userToUpdate);
+    public void updateUser(User user) {
+        userRepository.findByUsername(user.getUsername())
+            .ifPresent(existingUser -> {
+                existingUser.setUsername(user.getUsername());
+                existingUser.setEmail(user.getEmail());
+                existingUser.setPhone(user.getPhone());
+                existingUser.setToken(user.getToken());
+                existingUser.setRole(user.getRole());
+                existingUser.setPassword(user.getPassword());
+                existingUser.setFirstname(user.getFirstname());
+                existingUser.setLastname(user.getLastname());
+                userRepository.save(existingUser);
+            });
     }
 
     public Optional<User> findByPhone(String phone) {

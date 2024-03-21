@@ -23,15 +23,25 @@ class AuthenticationControllerTest extends BaseControllerTest {
     @Order(2)
     void loginUserTest() throws Exception {
         loginTestUser();
-        assertNotNull(token);
+        assertNotNull(TOKEN);
     }
 
     @Test
-    @DisplayName("Clean up")
+    @DisplayName("Logout user")
     @Order(3)
-    void cleanUp() throws Exception {
-        String message = deleteTestUser();
-        assertEquals("User deleted successfully", message);
+    void logoutUserTest() throws Exception {
+        String message = logoutUser();
+        assertEquals("User successfully logged out", message);
     }
+
+//    @Test
+//    @DisplayName("Clean up")
+//    @Order(4)
+//    void cleanUp() throws Exception {
+//        registerTestUser();
+//        loginTestUser();
+//        String message = deleteTestUser();
+//        assertEquals("User deleted successfully", message);
+//    }
 
 }

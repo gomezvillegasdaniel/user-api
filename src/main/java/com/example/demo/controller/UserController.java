@@ -44,13 +44,10 @@ public class UserController {
     }
 
     @PutMapping(produces = "application/json")
-    public ResponseEntity<Object> updateUser(@RequestBody User userUpdates) {
-        Optional<User> existingUser = userService.findByUserName(userUpdates.getUsername());
-        if (existingUser.isEmpty()) {
-            return utilService.buildResponse(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE);
-        }
-        User updatedUser = userService.updateUser(userUpdates, existingUser.get());
-        return utilService.buildResponse(HttpStatus.OK, "User updated successfully", updatedUser);
+    public ResponseEntity<Object> updateUser(@RequestBody User user) {
+        userService.findByUserName(user.getUsername())
+            .ifPresentOrElse(userService::updateUser, () -> utilService.buildResponse(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE));
+        return utilService.buildResponse(HttpStatus.OK, "User updated successfully");
     }
 
     @GetMapping(value = "/{userName}", produces = "application/json")

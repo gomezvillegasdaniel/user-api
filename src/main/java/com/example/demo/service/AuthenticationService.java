@@ -7,7 +7,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,19 +20,21 @@ import static com.example.demo.constant.SecurityConstant.USER_SUCCESSFULLY_AUTHE
 @Service
 public class AuthenticationService {
 
-    private static final Logger LOGGER = Logger.getLogger(AuthenticationService.class.getName());
+    public static final Logger LOGGER = Logger.getLogger(AuthenticationService.class.getName());
 
     private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationService(
-            UserRepository userRepository,
+    public AuthenticationService(UserRepository userRepository,
+            UserService userService,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
+        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -48,17 +49,17 @@ public class AuthenticationService {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
             new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
 
-        try {
-            authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        } catch (AuthenticationException exception) {
-            LOGGER.log(Level.SEVERE, "User authentication failed", exception);
-        }
+        authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
         User user = userRepository.findByUsername(request.getUsername())
             .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_AUTHENTICATING_MESSAGE));
 
+        String token = jwtService.generateToken(user);
+        user.setToken(token);
+        userService.updateUser(user);
+
         LOGGER.log(Level.INFO, "User authenticated successfully");
-        return new AuthenticationResponse(USER_SUCCESSFULLY_AUTHENTICATED_MESSAGE, jwtService.generateToken(user));
+        return new AuthenticationResponse(USER_SUCCESSFULLY_AUTHENTICATED_MESSAGE, token);
     }
 
     @Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
@@ -75,5 +76,12 @@ public class AuthenticationService {
             .build();
         userRepository.save(user);
         LOGGER.log(Level.INFO, "User registered successfully");
+    }
+
+    @Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+    public void logout(String token) {
+        LOGGER.log(Level.INFO, "Logging out user...");
+        jwtService.invalidateToken(token);
+        LOGGER.log(Level.INFO, "User successfully logged out");
     }
 }
