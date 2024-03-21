@@ -42,7 +42,7 @@ public class AuthenticationService {
 
     // TODO: normalize all the responses to be HttpResponse
 
-    @Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+    @Retryable(retryFor = RuntimeException.class, backoff = @Backoff(delay = 3000))
     public AuthenticationResponse authenticate(User request) {
         LOGGER.log(Level.INFO, "Authenticating user...");
 
@@ -62,7 +62,7 @@ public class AuthenticationService {
         return new AuthenticationResponse(USER_SUCCESSFULLY_AUTHENTICATED_MESSAGE, token);
     }
 
-    @Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+    @Retryable(retryFor = RuntimeException.class, backoff = @Backoff(delay = 3000))
     public void register(User request) {
         LOGGER.log(Level.INFO, "Registering user...");
         var user = User.builder()
@@ -78,7 +78,7 @@ public class AuthenticationService {
         LOGGER.log(Level.INFO, "User registered successfully");
     }
 
-    @Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 3000))
+    @Retryable(retryFor = RuntimeException.class, backoff = @Backoff(delay = 3000))
     public void logout(String token) {
         LOGGER.log(Level.INFO, "Logging out user...");
         jwtService.invalidateToken(token);
