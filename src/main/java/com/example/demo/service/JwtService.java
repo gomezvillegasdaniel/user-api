@@ -18,25 +18,19 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
+    // TODO: read this from an environment variable
     private static final String SECRET_KEY = "22cb98e624e8920be075d27983853f8d86ed636826c23bfc752647510ebf110d";
 
-    private static final List<String> BLACK_LIST = new ArrayList<>();
+    // TODO: save this on database
+    private static final List<String> TOKENS_WHITE_LIST = new ArrayList<>();
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    private void addTokenToBlackList(String token) {
-        BLACK_LIST.add(token);
-    }
-
-    public void invalidateToken(String token) {
-        addTokenToBlackList(token);
-    }
-
     public boolean isValid(String token, UserDetails user) {
         String username = extractUsername(token);
-        return (username.equals(user.getUsername())) && !isTokenExpired(token) && !BLACK_LIST.contains(token);
+        return (username.equals(user.getUsername())) && !isTokenExpired(token) && TOKENS_WHITE_LIST.contains(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -61,16 +55,26 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-        return Jwts.builder()
+        String token = Jwts.builder()
             .subject(user.getUsername())
             .issuedAt(new Date(System.currentTimeMillis()))
             .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)) // 1 hour
             .signWith(getSigninKey())
             .compact();
+        TOKENS_WHITE_LIST.add(token);
+        return token;
     }
 
     private SecretKey getSigninKey() {
         byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public void cleanTokensWhiteList() {
+        TOKENS_WHITE_LIST.clear();
+    }
+
+    public void invalidateToken(String token) {
+        TOKENS_WHITE_LIST.remove(token);
     }
 }
