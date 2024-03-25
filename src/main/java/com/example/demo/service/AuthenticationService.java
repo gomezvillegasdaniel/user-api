@@ -23,18 +23,15 @@ public class AuthenticationService {
     public static final Logger LOGGER = Logger.getLogger(AuthenticationService.class.getName());
 
     private final UserRepository userRepository;
-    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationService(UserRepository userRepository,
-            UserService userService,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
-        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
@@ -55,8 +52,6 @@ public class AuthenticationService {
             .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_AUTHENTICATING_MESSAGE));
 
         String token = jwtService.generateToken(user);
-        user.setToken(token);
-        userService.updateUser(user);
 
         LOGGER.log(Level.INFO, "User authenticated successfully");
         return new AuthenticationResponse(USER_SUCCESSFULLY_AUTHENTICATED_MESSAGE, token);

@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import com.example.demo.data.model.JwtToken;
 import com.example.demo.data.model.User;
+import com.example.demo.repository.JwtTokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -9,17 +11,20 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
 
 
 @Service
 public class JwtService {
 
-    // TODO: save this on database
-    private static final List<String> TOKENS_WHITE_LIST = new ArrayList<>();
+    private final JwtTokenRepository jwtTokenRepository;
+    private final UserService userService;
+
+    public JwtService(JwtTokenRepository jwtTokenRepository, UserService userService) {
+        this.jwtTokenRepository = jwtTokenRepository;
+        this.userService = userService;
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -27,7 +32,9 @@ public class JwtService {
 
     public boolean isValid(String token, UserDetails user) {
         String username = extractUsername(token);
-        return username.equals(user.getUsername()) && !isTokenExpired(token) && TOKENS_WHITE_LIST.contains(token);
+        return username.equals(user.getUsername()) &&
+            !isTokenExpired(token) &&
+            jwtTokenRepository.findByToken(token).isPresent();
     }
 
     private boolean isTokenExpired(String token) {
@@ -58,7 +65,9 @@ public class JwtService {
             .expiration(new Date(System.currentTimeMillis() + 60 * 60 * 1000)) // 1 hour
             .signWith(getSigninKey())
             .compact();
-        TOKENS_WHITE_LIST.add(token);
+        jwtTokenRepository.save(new JwtToken(token));
+        user.setToken(token);
+        userService.updateUser(user);
         return token;
     }
 
@@ -69,10 +78,10 @@ public class JwtService {
     }
 
     public void cleanTokensWhiteList() {
-        TOKENS_WHITE_LIST.clear();
+        jwtTokenRepository.findAll().clear();
     }
 
     public void invalidateToken(String token) {
-        TOKENS_WHITE_LIST.remove(token);
+        jwtTokenRepository.findByToken(token).ifPresent(jwtTokenRepository::delete);
     }
 }
