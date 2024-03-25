@@ -18,9 +18,6 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // TODO: read this from an environment variable
-    private static final String SECRET_KEY = "22cb98e624e8920be075d27983853f8d86ed636826c23bfc752647510ebf110d";
-
     // TODO: save this on database
     private static final List<String> TOKENS_WHITE_LIST = new ArrayList<>();
 
@@ -66,7 +63,8 @@ public class JwtService {
     }
 
     private SecretKey getSigninKey() {
-        byte[] keyBytes = Decoders.BASE64URL.decode(SECRET_KEY);
+        String secretKey = System.getenv("SECRET_KEY");
+        byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
