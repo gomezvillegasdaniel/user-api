@@ -1,0 +1,1 @@
+Set your JWT_TOKEN_SECRET_KEY environment variable.
