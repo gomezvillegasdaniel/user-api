@@ -72,7 +72,7 @@ public class JwtService {
     }
 
     private SecretKey getSigninKey() {
-        String secretKey = System.getenv("SECRET_KEY");
+        String secretKey = System.getenv("JWT_TOKEN_SECRET_KEY");
         byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
