@@ -40,7 +40,7 @@ public class UserController {
             return utilService.buildResponse(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE);
         }
         userService.deleteUser(existingUser.get());
-        return utilService.buildResponse(HttpStatus.OK, "User deleted successfully");
+        return utilService.buildResponse(HttpStatus.NO_CONTENT, "User deleted successfully");
     }
 
     @PutMapping(produces = "application/json")
