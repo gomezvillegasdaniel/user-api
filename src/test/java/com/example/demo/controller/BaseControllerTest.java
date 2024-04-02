@@ -72,7 +72,7 @@ public class BaseControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .header("Authorization", "Bearer " + TOKEN);
         String response = mockMvc.perform(request)
-            .andExpect(status().isOk())
+            .andExpect(status().isNoContent())
             .andExpect(jsonPath("$.message", equalTo("User deleted successfully")))
             .andReturn().getResponse().getContentAsString();
         return gson.fromJson(response, Map.class).get("message").toString();
